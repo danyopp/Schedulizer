@@ -1,11 +1,141 @@
 var express = require("express");
 var request = require("request");
+var mysql = require('./dbcon.js')
 bodyParser = require("body-parser");
 var app = express();
 
 app.use(bodyParser.urlencoded({extended: true})); 
 app.use(express.static("public"));  //Serve Public folder
 app.set("view engine", "ejs");      //allows links to "about" instead of "about.ejs"
+// app.set('port', process.argv[2]);
+app.set('mysql', mysql);
+
+
+// ==============================================
+// DATABASE CALL FUNCTIONS
+// ==============================================
+
+//Home page
+    //Get user info for all employees
+function getUsers(res, mysql, context, complete){
+    mysql.pool.query("SELECT firstName, lastName, employeeID, isManager  FROM `Employees`", function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }
+        context.info = JSON.parse(JSON.stringify(results));
+        complete();
+    });
+}
+
+//User Page
+    //Get user info for a single employee
+function getSingleUser(res, mysql, context, complete, employeeNum){
+    mysql.pool.query("SELECT firstName, lastName, employeeID, managerID, monStart, monStop, tuesStart, tuesStop, wedStart, wedStop, thurStart, " +
+                        "thurStop, friStart, friStop, satStart, satStop, sunStart, sunStop  FROM `Employees` WHERE employeeID = " + employeeNum, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }
+        context.userinfo = JSON.parse(JSON.stringify(results));
+        complete();
+    });
+}
+    //Get a users time off requests
+function getUserRequests(res, mysql, context, complete, employeeNum){
+    mysql.pool.query("SELECT date, comment, approvalStatus  FROM `Time-Off-Requests` WHERE employeeID = " + employeeNum, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }
+        context.requestinfo = JSON.parse(JSON.stringify(results));
+        complete();
+    });
+}
+    //Get a employee's shifts
+function getUserShifts(res, mysql, context, complete, employeeNum){
+    mysql.pool.query("SELECT Shifts.date, Shifts.startTime, Shifts.stopTime, Schedules.name, Employees.firstname, Employees.lastname FROM `Shifts`"+
+                        "INNER JOIN Schedules ON Schedules.scheduleID = Shifts.scheduleID INNER JOIN Employees ON Employees.employeeID = Schedules.managerID "+
+                         "WHERE Shifts.employeeID = " + employeeNum, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }
+        context.shiftinfo = JSON.parse(JSON.stringify(results));
+        complete();
+    });
+}
+//Manager Page
+    // get time off requests for all employees under a manager
+function getManTOR(res, mysql, context, complete, employeeNum){
+    mysql.pool.query("SELECT tor.date, tor.requestID, tor.comment, tor.approvalStatus, tor.employeeID, Employees.firstName, Employees.lastName" +
+                         " FROM `Time-Off-Requests` tor INNER JOIN Employees ON tor.employeeID = Employees.employeeID WHERE Employees.managerID = " + employeeNum, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }
+        context.torinfo = JSON.parse(JSON.stringify(results));
+        complete();
+    });
+}
+    //get a manager's schedules
+function getManSchedules(res, mysql, context, complete, employeeNum){
+    mysql.pool.query("SELECT scheduleID, startDate, endDate, name  FROM Schedules WHERE managerID = " + employeeNum, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }
+        context.schedinfo = JSON.parse(JSON.stringify(results));
+        complete();
+    });
+}
+    //get a manager's assigned employees
+function getManEmployees(res, mysql, context, complete, employeeNum){
+    mysql.pool.query("SELECT employeeID, firstName, lastName FROM `Employees` WHERE managerID = " + employeeNum, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }
+        context.employeeinfo = JSON.parse(JSON.stringify(results));
+        complete();
+    });
+}
+
+//Schedule Page
+    //get Schedule data
+    function getSchedule(res, mysql, context, complete, scheduleNum){
+        mysql.pool.query("SELECT managerID, startDate, endDate, name, scheduleID FROM `Schedules` WHERE scheduleID = " + scheduleNum, function(error, results, fields){
+            if(error){
+                res.write(JSON.stringify(error));
+                res.end();
+            }
+            context.scheduleinfo = JSON.parse(JSON.stringify(results));
+            complete();
+        });
+    }
+    //Get shift data for a schedule
+    function getSchedShifts(res, mysql, context, complete, scheduleNum){
+        mysql.pool.query("SELECT sh.shiftID, sh.employeeID, sh.startTime, sh.stopTime, sh.date, e.firstName, e.lastName FROM `Shifts` sh"+
+        " LEFT JOIN Employees e ON e.employeeID = sh.employeeID WHERE scheduleID = " + scheduleNum, function(error, results, fields){
+            if(error){
+                res.write(JSON.stringify(error));
+                res.end();
+            }
+            context.shiftinfo = JSON.parse(JSON.stringify(results));
+            complete();
+        });
+    }
+
+    //get employees available to work a shift
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
 
 
 
@@ -13,319 +143,296 @@ app.set("view engine", "ejs");      //allows links to "about" instead of "about.
 // ROUTES
 // ==============================================
 
-//Empty
+//Homepage
 app.get("/", function(req,res){
     res.redirect("/home");
 });
 
 app.get("/home", function(req,res){
-    console.log("Incoming / request from " + req.ip)
-
-    tempdata = [
-            {   firstname: "Bill",
-                lastname: "Smith",
-                id: 44,
-                isManager: true
-            },
-            {   firstname: "Sarah",
-                lastname: "Perkins",
-                id: 456,
-                isManager: true
-            },
-            {   firstname: "Sam",
-                lastname: "Moore",
-                id: 21,
-                isManager: false
-            },
-            {   firstname: "Sally",
-                lastname: "Seashells",
-                id: 70,
-                isManager: false
-            },
-            {   firstname: "Roger",
-                lastname: "Toughguy",
-                id: 70,
-                isManager: false
-            }
-        ]
-    res.render("home.ejs",{pagetitle: "Home", Users: tempdata});
+    var callbackCount = 0;
+    var context = {};
+    var mysql = req.app.get('mysql');
+    getUsers(res, mysql, context, complete);
+    function complete(){
+        callbackCount++;
+        if(callbackCount >= 1){
+            res.render("home.ejs",{pagetitle: "Home", Users: context.info});;
+        }
+    }
 });
 
+//create new employee or manager
 app.post("/createuser", function(req,res){
-    console.log("create user");
-    res.redirect("/home")
+    var mysql = req.app.get('mysql');
+    var sql = "INSERT INTO Employees (email, lastName, firstName, isManager, managerID) VALUES (?,?,?,?,?)";
+    var manId = 0;
+    if(req.body.userType == 0)
+        {manId = req.body.userNumber;}; 
+    var inserts = [req.body.email, req.body.lastname, req.body.firstname, req.body.userType, manId];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/home")
+        }
+    });
 });
 
+//link to employee pages
 app.post("/accessuser", function(req,res){
-    console.log("access user");
     var userid = req.body.userNumber
-    console.log(userid)
     res.redirect("/user/" + userid)
 });
 
+//link to manager pages
 app.post("/accessmanager", function(req,res){
-    console.log("access manager");
     var userid = req.body.userNumber
-    console.log(userid)
     res.redirect("/manager/" + userid)
 });
 
 //////////////////////////////////////////////////////////
 //USER account page
-
 app.get("/user/:usernum", function(req,res){
     //get user data
-        console.log(req.params.usernum)    //Use this param to get the rest of the info for this user
-        var userObj = { firstname: "firstname",
-                        lastname: "lastname",
-                        email: "morefill",
-                        employeeID: req.params.usernum,
-                        monStart: null, monStop: "10:00", tuesStart: null, tuesStop: null, wedStart: null, wedStop: null, 
-                        thurStart: null, thurStop: null, friStart: null, friStop: null, satStart: null, satStop: null,
-                        sunStart: null, sunStop: null
+
+    var callbackCount = 0;
+    var context = {};
+    var mysql = req.app.get('mysql');
+    getSingleUser(res, mysql, context, complete, req.params.usernum);
+    getUserRequests(res, mysql, context, complete, req.params.usernum);
+    getUserShifts(res, mysql, context, complete, req.params.usernum);
+    function complete(){
+        callbackCount++;
+        if(callbackCount >= 3){
+            res.render("user.ejs",{pagetitle: "User Account", userInfo: context.userinfo, schInfo: context.shiftinfo, requestInfo: context.requestinfo});
         }
-    //get schedules based on usernum parameter
-        var scheObj = [{
-            shiftID: 21201,
-            startTime: "fill data",
-            stopTime: "fill data",
-            date: "date data",
-            day: "day of the week",
-            schedName: "filldata",
-            manName: "filldata" },
-        {   shiftID: 56422,
-            startTime: "fill data",
-            stopTime: "fill data",
-            date: "date data",
-            day: "day of the week",
-            schedName: "filldata",
-            manName: "filldata" },
-        {   shiftID: 56422,
-            startTime: "fill data",
-            stopTime: "fill data",
-            date: "date data",
-            day: "day of the week",
-            schedName: "filldata",
-            manName: "filldata" }
-        ]
-
-      
-    //get time off requests
-        var requestObj = [
-            {   date: "filldate",
-                approvalStatus: true,
-                comment: "comment here"},
-            {   date: "filldate",
-                approvalStatus: false,
-                comment: "comment here"},
-            {   date: "filldate",
-                approvalStatus: true,
-                comment: "comment here"},
-        
-        ]
-    res.render("user.ejs",{pagetitle: "User Account", userInfo: userObj, schInfo: scheObj, requestInfo: requestObj});
+    }
+    
 });
 
+//update availability
 app.post("/updateAva", function(req,res){
-    console.log("update availability");
-    console.log(req.body)
-    var userid = req.body.userId
-    console.log(userid)
-    res.redirect("/user/" + userid)
+    var mysql = req.app.get('mysql');
+    var sql = "UPDATE Employees SET sunStart=?, sunStop=?, monStart=?, monStop=?, tuesStart=?, tuesStop=?, wedStart=?, wedStop=?, thurStart=?," +
+                " thurStop=?, friStart=?, friStop=?, satStart=?, satStop=? WHERE employeeID = " + req.body.userId;
+    var inserts = [req.body.sunStart, req.body.sunStop, req.body.monStart, req.body.monStop, req.body.tuesStart, req.body.tuesStop, req.body.wedStart, 
+                    req.body.wedStop, req.body.thurStart, req.body.thurStop, req.body.friStart, req.body.friStop,req.body.satStart, req.body.satStop];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/user/" + req.body.userId)
+        }
+    });
 });
 
+//add time off request
 app.post("/addTimeOff", function(req,res){
-    console.log("add time off request");
-    var userid = req.body.userId
-    console.log(userid)
-    console.log("done")
-    res.redirect("/user/" + userid)
+    var mysql = req.app.get('mysql');
+    var sql = "INSERT INTO `Time-Off-Requests` (employeeID, date, comment, approvalStatus) VALUES (?,?,?,?)";
+    var inserts = [req.body.userId, req.body.date, req.body.comment, 0];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/user/" + req.body.userId)
+        }
+    });
 });
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //Manager Page
 app.get("/manager/:usernum", function(req,res){
-
-    console.log(req.params.usernum)    //Use this param to get the rest of the info for this user
-    var userObj = { firstname: "firstname",
-                    lastname: "lastname",
-                    email: "morefill",
-                    employeeID: req.params.usernum,
-                    monStart: null, monStop: "10:00", tuesStart: null, tuesStop: null, wedStart: null, wedStop: null, 
-                    thurStart: null, thurStop: null, friStart: null, friStop: null, satStart: null, satStop: null,
-                    sunStart: null, sunStop: null
-    };
-
-    var schedObj = [
-            {   managerId: req.params.usernum,
-                scheName: "Cashiers - week6",
-                startdate: "11/12/2010",
-                enddate: "12/12/2010",
-                scheduleId: 12},
-            {   managerId: req.params.usernum,
-                scheName: "Stockers - week6",
-                startdate: "11/12/2010",
-                enddate: "12/12/2010",
-                scheduleId: 13},
-            {   managerId: req.params.usernum,
-                scheName: "Maintenance - week6",
-                startdate: "11/12/2010",
-                enddate: "12/12/2010",
-                scheduleId: 14}
-            ]   
-
-    var timeOff = [
-            {   requestId: 999,
-                employeeID: 16,
-                date: "11/17/2010",
-                comment: "I'm out of town",
-                approvalStatus: false},
-            {   requestId: 992,
-                employeeID: 17,
-                date: "11/17/2010",
-                comment: "I'm out of town",
-                approvalStatus: false},
-            {   requestId: 921,
-                employeeID: 18,
-                date: "11/17/2010",
-                comment: "I'm out of town",
-                approvalStatus: false} ]
-
-    var employees = [            
-        {   firstname: "Sam",
-            lastname: "Moore",
-            id: 21,
-            isManager: false
-        },
-        {   firstname: "Sally",
-            lastname: "Seashells",
-            id: 70,
-            isManager: false
-        },
-        {   firstname: "Roger",
-            lastname: "Toughguy",
-            id: 87,
-            isManager: false
-        }];
-
-
-    res.render("manager.ejs",{pagetitle: "Manager Account", userInfo: userObj, schInfo: schedObj, timeOff: timeOff, employeeInfo: employees});
+        var callbackCount = 0;
+        var context = {};
+        var mysql = req.app.get('mysql');
+        getManEmployees(res, mysql, context, complete, req.params.usernum);
+        getManTOR(res, mysql, context, complete, req.params.usernum);
+        getSingleUser(res, mysql, context, complete, req.params.usernum);
+        getManSchedules(res, mysql, context, complete, req.params.usernum);
+        function complete(){
+            callbackCount++;
+            if(callbackCount >= 4){
+                res.render("manager.ejs", {pagetitle: "Manager Account", 
+                userInfo: context.userinfo, 
+                schInfo: context.schedinfo,
+                 timeOff: context.torinfo, 
+                 employeeInfo: context.employeeinfo});
+                }
+        }
 });
 
-app.get("/timeoff/approve/:request", function(req,res){
-    console.log("approve request");
-    console.log(req.params.request)
-    //get manager id from request off
-    res.redirect("/manager/80")
+//Approve time off request
+app.get("/timeoff/approve/:manager/:torReq", function(req,res){
+    var mysql = req.app.get('mysql');
+    var sql = "UPDATE `Time-Off-Requests` SET approvalStatus=? WHERE requestID = " + req.params.torReq;
+    var inserts = [1];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/manager/" + req.params.manager)
+        }
+    });
 });
 
-app.get("/timeoff/deny/:request", function(req,res){
-    console.log("deny request");
-    console.log(req.params.request)
-    //get manager id from request off
-    res.redirect("/manager/90")
+//deny time off request
+app.get("/timeoff/deny/:manager/:torReq", function(req,res){
+    var mysql = req.app.get('mysql');
+    var sql = "UPDATE `Time-Off-Requests` SET approvalStatus=? WHERE requestID = " + req.params.torReq;
+    var inserts = [0];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/manager/" + req.params.manager)
+        }
+    });
 });
 
-app.get("/userdelete/:userId", function(req,res){
-    console.log("delete user");
-    console.log(req.params.request)
-    //get manager id from employee
-    res.redirect("/manager/110" )
+//delete employee
+app.get("/userdelete/:manager/:userId", function(req,res){
+    var mysql = req.app.get('mysql');
+    var sql = "DELETE FROM Employees WHERE employeeID = ?";
+    var inserts = [req.params.userId];
+    sql = mysql.pool.query(sql, inserts, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.status(400);
+            res.end();
+        }else{
+            res.redirect("/manager/" + req.params.manager)
+        }
+    });
 });
 
-app.get("/manager/delete/:userId", function(req,res){
-    console.log("delete schedule");
-    console.log(req.params.request)
-    //get manager id from employee
-    res.redirect("/manager/100" )
+//delete schedule
+app.get("/manager/delete/:managerId/:schedId", function(req,res){
+    var mysql = req.app.get('mysql');
+    var sql = "DELETE FROM Schedules WHERE scheduleID = ?";
+    var inserts = [req.params.schedId];
+    sql = mysql.pool.query(sql, inserts, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.status(400);
+            res.end();
+        }else{
+            res.redirect("/manager/" + req.params.managerId)
+        }
+    });
 });
 
+//create schedule
 app.post("/manager/create", function(req,res){
-    //create new schedule
-    console.log("add new schedule");
-    console.log(req.body)
-    var userid = req.body.employeeId
-    console.log(userid)
-    res.redirect("/manager/" + userid)
+    var mysql = req.app.get('mysql');
+    var sql = "INSERT INTO `Schedules` (managerID, startDate, endDate, name) VALUES (?,?,?,?)";
+    var inserts = [req.body.employeeId, req.body.startdate, req.body.enddate, req.body.name];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/manager/" + req.body.employeeId)
+        }
+    });
+    
 });
 
 //////////////////////////////////////////////////////////////////////////////
 //Schedule page
 app.get("/schedule/:scheNum", function(req,res){
-    var scheduleObj = {schedulename: "Cashiers- week 52",
-                       scheduleid: req.params.scheNum,
-                       startdate: "2018-02-14",
-                       enddate: "2018-02-24" }
-    // console.log(scheduleObj, "done")
-    var shiftObj = [
-        {   shiftID: 16,
-            startTime: "12:13pm",
-            stopTime: "3:25pm",
-            date: "2018-02-20",
-            employeeID: null,
-            employeeName: null,
-            possibleEmploy: [ {id: 21, name: "Bill"},{id: 34, name: "Megan"}, {id: 52, name: "Willis"}]
-        },
-        {   shiftID: 17,
-            startTime: "12:13pm",
-            stopTime: "3:25pm",
-            date: "2018-02-20",
-            employeeID: 21,
-            employeeName: "Bill",
-            possibleEmploy: null
-        },
-        {   shiftID: 18,
-            startTime: "12:13pm",
-            stopTime: "3:25pm",
-            date: "2018-02-20",
-            employeeID: null,
-            employeeName: null,
-            possibleEmploy: [ {id: 21, name: "Bill"},{id: 34, name: "Megan"}, {id: 52, name: "Willis"}]
-        },
-        {   shiftID: 19,
-            startTime: "12:13pm",
-            stopTime: "3:25pm",
-            date: "2018-02-20",
-            employeeID: null,
-            employeeName: null,
-            possibleEmploy: null
+        var callbackCount = 0;
+        var context = {};
+        var mysql = req.app.get('mysql');
+        getSchedule(res, mysql, context, complete, req.params.scheNum);
+        getSchedShifts(res, mysql, context, complete, req.params.scheNum);
+        //Get employees who can work shifts
+        function complete(){
+            callbackCount++;
+            if(callbackCount >= 2){
+                res.render("schedule.ejs",{pagetitle: "Schedule Page", schedInfo: context.scheduleinfo, shiftInfo: context.shiftinfo});
+                }
         }
-]
-
-    res.render("schedule.ejs",{pagetitle: "Schedule Page", schedInfo: scheduleObj, shiftInfo: shiftObj});
 });
 
-app.get("/shiftdelete/:shiftnumber", function(req,res){
-    //create new schedule
-    console.log(req.params.shiftnumber);
-    res.redirect("/schedule/123")
+
+//Create a shift
+app.post("/schedule/createshift", function(req,res){
+    var mysql = req.app.get('mysql');
+    var sql = "INSERT INTO `Shifts` (scheduleID, startTime, stopTime, date) VALUES (?,?,?,?)";
+    var inserts = [req.body.scheduleId, req.body.startTime, req.body.endTime, req.body.date];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/schedule/" + req.body.scheduleId)        
+        }
+    });
 });
 
-app.post("/schedule/:scheduleID/createshift", function(req,res){
-    //create new schedule
-    console.log("add new schedule");
-    console.log(req.body)
-    var userid = req.body.employeeId
-    console.log(userid)
-    res.redirect("/schedule/" + req.params.scheduleID)
+//update a shift
+app.post("/shiftupdate", function(req,res){
+    console.log(req.body);
+    var mysql = req.app.get('mysql');
+    var sql = "UPDATE `Shifts` SET startTime=?, stopTime=?, date=? WHERE shiftID = " + req.body.shiftNumber;
+    var inserts = [req.body.startTime, req.body.endTime, req.body.date];
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/schedule/" + req.body.scheduleId)
+        }
+    });
+
 });
+
+//Delete a shift
+app.get("/shiftdelete/:schedID/:shiftnumber", function(req,res){
+    var mysql = req.app.get('mysql');
+    var sql = "DELETE FROM Shifts WHERE shiftID = ?";
+    var inserts = [req.params.shiftnumber];
+    sql = mysql.pool.query(sql, inserts, function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.status(400);
+            res.end();
+        }else{
+            res.redirect("/schedule/" + req.params.schedID)
+        }
+    });
+});
+
+
+//assign employee to shift
 app.post("/shiftassign/:shiftID", function(req,res){
     //create new schedule
     console.log(req.params.shiftID);
-    console.log("Selected Employee: ", req.body.userNumber)
-    res.redirect("/schedule/456" + req.params.scheduleID)
+    // console.log("Selected Employee: ", req.body.userNumber)
+    // res.redirect("/schedule/456" + req.params.scheduleID)
 });
-app.post("/shiftupdate", function(req,res){
-    //create new schedule
 
-    res.redirect("/schedule/456")
-});
+
 
 // ==============================================
 // LISTEN
 // ==============================================
 
 const PORT = process.env.PORT || 31115;
+
+
+// app.listen(app.get('port'), function(){
+//     console.log('Express started on http://localhost:' + app.get('port') + '; press Ctrl-C to terminate.');
+//   });
+
 app.listen(PORT, function(){
     console.log("Server started on port", PORT)
 })

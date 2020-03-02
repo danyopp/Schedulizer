@@ -4,7 +4,7 @@
 
 <head>
   <%- include('partials/head') %>
-  <link rel="stylesheet" type="text/css" href="login.css" >
+
 </head>
 
 <body class="container">
@@ -17,33 +17,31 @@
                     <form action="/createuser" method="POST">
                         <div class="form-group">
                             <label for="newEmail">Email address</label>
-                            <input type="email" class="form-control" id="newEmail" name="email" placeholder="Email">
-                            <label for="newPass">Password</label>
-                            <input type="password" class="form-control" id="newPass" name="password" placeholder="Password">
+                            <input type="email" class="form-control mb-3" id="newEmail" name="email" placeholder="Email" required>
                             <label for="fname">First Name</label>
-                            <input type="text" class="form-control" id="fname" name="firstname" placeholder="First Name">
+                            <input type="text" class="form-control mb-3" id="fname" name="firstname" placeholder="First Name" required>
                             <label for="lname">Last Name</label>
-                            <input type="text" class="form-control" id="lname" name="lastname" placeholder="Last Name">
+                            <input type="text" class="form-control mb-3" id="lname" name="lastname" placeholder="Last Name" required>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="userType" id="radio1" value="user" checked="checked">
+                                <input class="form-check-input" type="radio" name="userType" id="radio1" value="0" checked="checked">
                                 <label class="form-check-label" for="radio1">
                                   User Account
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="userType" id="radio2" value="manager">
+                                <input class="form-check-input" type="radio" name="userType" id="radio2" value="1">
                                 <label class="form-check-label" for="radio2">
                                   Manager Account
                                 </label>
                             </div>
-                            <label class="mr-sm-2" for="selectManager">User Accounts must select a manager:</label>
+                            <label class="mr-sm-2 mt-4" for="selectManager">Select the Manager of this Employee (Ignore this field if creating a manager):</label>
                             <select class="custom-select mr-sm-2" id="selectManager" name="userNumber" required>
                             <option selected disabled>Choose...</option>
                                 <%        Users.forEach(function(ele, i){       %>
-                                <%        if (ele.isManager === true){         %>
-                            <option value="<%= ele.id %>">
-                                <%=     ele.firstname                           %> 
-                                <%=     ele.lastname                            %>
+                                <%        if (ele.isManager === 1){         %>
+                            <option value="<%= ele.employeeID %>">
+                                <%=     ele.firstName                           %> 
+                                <%=     ele.lastName                            %>
                                 </option>
                                 <%  }   });                                     %>
                             </select>
@@ -63,10 +61,10 @@
                 <select class="custom-select mr-sm-2" id="userId" name="userNumber" required>
                 <option selected disabled>Choose...</option>
                     <%        Users.forEach(function(ele, i){       %>
-                    <%        if (ele.isManager === false){         %>
-                <option value="<%= ele.id %>">
-                    <%=     ele.firstname                           %> 
-                    <%=     ele.lastname                            %>
+                    <%        if (ele.isManager === 0){         %>
+                <option value="<%= ele.employeeID %>">
+                    <%=     ele.firstName                           %> 
+                    <%=     ele.lastName                            %>
                     </option>
                     <%  }   });                                     %>
                 </select>
@@ -81,10 +79,10 @@
                 <select class="custom-select mr-sm-2" id="userId" name="userNumber" required>
                 <option selected disabled>Choose...</option>
                     <%        Users.forEach(function(ele, i){       %>
-                    <%        if (ele.isManager === true){         %>
-                <option value="<%= ele.id %>">
-                    <%=     ele.firstname                           %> 
-                    <%=     ele.lastname                            %>
+                    <%        if (ele.isManager === 1){         %>
+                <option value="<%= ele.employeeID %>">
+                    <%=     ele.firstName                           %> 
+                    <%=     ele.lastName                            %>
                     </option>
                     <%  }   });                                     %>
                 </select>

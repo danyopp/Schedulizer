@@ -4,18 +4,17 @@
 
 <head>
   <%- include('partials/head') %>
-  <link rel="stylesheet" type="text/css" href="login.css" >
 </head>
 
-<body class="container">
+<body >
     <div class="row">
             <h5 class="text-center col-sm-12">MANAGER ACCOUNT: 
-                <%= userInfo.firstname %>
-                <%= userInfo.lastname %>
+                <%= userInfo[0].firstName %>
+                <%= userInfo[0].lastName %>
             </h5>
     </div>
     <div class="row">
-        <div class= "card col-md-12 text-center">
+        <div class= "card col-lg-12 text-center">
             <h6 class= "card-header">Current Schedules</h6>
                 <table class= "table">
                   <thead>
@@ -31,12 +30,12 @@
                   <tbody>
                     <%        schInfo.forEach(function(ele, i){       %>
                         <tr>
-                        <td> <%=     ele.scheduleId       %> </td>
-                        <td> <%=     ele.scheName       %> </td>
-                        <td> <%=     ele.startdate       %> </td>
-                        <td> <%=     ele.enddate       %> </td>
-                        <td>    <a href="/schedule/<%=  ele.scheduleId  %>" class="btn btn-primary">Edit</a> </td>
-                        <td>    <a href="/manager/delete/<%=  ele.scheduleId  %>" class="btn btn-danger">Delete</a> </td>
+                        <td> <%=     ele.scheduleID       %> </td>
+                        <td> <%=     ele.name       %> </td>
+                        <td> <%=     ele.startDate       %> </td>
+                        <td> <%=     ele.endDate       %> </td>
+                        <td>    <a href="/schedule/<%=  ele.scheduleID  %>" class="btn btn-primary">Edit</a> </td>
+                        <td>    <a href="/manager/delete/<%= userInfo[0].employeeID %>/<%=  ele.scheduleID  %>" class="btn btn-danger">Delete</a> </td>
                         </tr>
                             <%    });                  %>
                   </tbody>
@@ -44,7 +43,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="card col-md-12 text-center">
+        <div class="card col-lg-12 text-center">
             <h6 class="card-header">Create New Schedule</h6>
             <div class="card-body">
                 <form action="/manager/create" method="POST" >
@@ -54,7 +53,7 @@
                     <input type="date" id="schName" name="startdate" placeholder="Schedule Name">
                     <label for="schName">End Date:</label>
                     <input type="date" id="schName" name="enddate" placeholder="Schedule Name">
-                    <input type="hidden" name="employeeId" value= "<%= userInfo.employeeID %>">
+                    <input type="hidden" name="employeeId" value= "<%= userInfo[0].employeeID %>">
                     <input type="submit" class="btn btn-primary" value="submit">
                 </form>
 
@@ -67,7 +66,7 @@
     </div>
 
     <div class="row">
-        <div class="card col-sm-6">
+        <div class="card col-lg-8">
             <h6 class="card-header text-center"> Time Off Requests</h6>
             <div class="card-body">
                 <table class= "table">
@@ -88,8 +87,8 @@
                           <td> <%=     ele.comment       %> </td>
                           <td> <%=     ele.date       %> </td>
                           <td> <%=     ele.approvalStatus       %> </td>
-                          <td>    <a href="/timeoff/approve/<%=  ele.requestId  %>" class="btn btn-success">Approve</a> 
-                                    <a href="/timeoff/deny/<%=  ele.requestId %>" class="btn btn-danger">Deny</a> 
+                          <td>    <a href="/timeoff/approve/<%= userInfo[0].employeeID %>/<%=  ele.requestID  %>" class="btn btn-success">Approve</a> 
+                                    <a href="/timeoff/deny/<%= userInfo[0].employeeID %>/<%=  ele.requestID %>" class="btn btn-danger">Deny</a> 
                             </td>
                           </tr>
                               <%    });                  %>
@@ -100,7 +99,7 @@
             </div>
 
         </div>
-        <div class="card col-sm-6">
+        <div class="card col-lg-4">
             <h6 class="card-header text-center"> Employees</h6>
             <div class="card-body">
                 <table class= "table">
@@ -116,10 +115,10 @@
                     <tbody>
                       <%        employeeInfo.forEach(function(ele, i){       %>
                           <tr>
-                          <td> <%=     ele.id       %> </td>
-                          <td> <%=     ele.firstname       %> </td>
-                          <td> <%=     ele.lastname       %> </td>
-                          <td>    <a href="/userdelete/<%=  ele.id %>" class="btn btn-danger">Delete</a>  </td>
+                          <td> <%=     ele.employeeID       %> </td>
+                          <td> <%=     ele.firstName       %> </td>
+                          <td> <%=     ele.lastName       %> </td>
+                          <td>    <a href="/userdelete/<%= userInfo[0].employeeID %>/<%=  ele.employeeID %>" class="btn btn-danger">Delete</a>  </td>
                           </tr>
                               <%    });                  %>
                     </tbody>
