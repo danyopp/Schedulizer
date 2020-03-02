@@ -1,0 +1,58 @@
+CREATE TABLE Employees
+(
+	employeeID INT AUTO_INCREMENT NOT NULL UNIQUE PRIMARY KEY, 
+	managerID INT NOT NULL, 
+	email varchar(255),
+	passwordHash varchar(255) NOT NULL, 
+	firstname varchar(255) NOT NULL, 
+	lastname varchar(255) NOT NULL,
+	monStart TIME, 
+	monStop TIME, 
+	tuesStart TIME, 
+	tuesStop TIME,
+	wedStart TIME, 
+	wedStop TIME, 
+	thursStart TIME, 
+	thursStop TIME, 
+	friStart TIME, 
+	friStop TIME, 
+	satStart TIME, 
+	satStop TIME, 
+	sunStart TIME, 
+	sunStop TIME, 
+	FOREIGN KEY (managerID) REFERENCES Employees(employeeID) ON DELETE SET NULL ON UPDATE CASCADE
+); 
+
+CREATE TABLE Time_Off_Requests
+(
+	requestID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	date DATE NOT NULL, 
+	employeeID INT NOT NULL, 
+	comment varchar(255), 
+	approvalStatus TINYINT(1) DEFAULT 0, 
+	FOREIGN KEY (employeeID) REFERENCES Employees(employeeID) ON DELETE CASCADE ON UPDATE CASCADE
+); 
+
+CREATE TABLE Shifts 
+(
+	shiftID INT AUTO_INCREMENT NOT NULL UNIQUE PRIMARY KEY,
+	date NOT NULL, 
+	startTime TIME NOT NULL, 
+	stopTime TIME NOT NULL, 
+	scheduleID INT NOT NULL, 
+	employeeID INT, 
+	day varchar(255) NOT NULL, 
+	FOREIGN KEY (scheduleID) REFERENCES Schedules(scheduleID) ON DELETE CASCADE ON UPDATE CASCADE, 
+	FOREIGN KEY (employeeID) REFERENCES Employees(employeeID) ON DELETE CASCADE ON UPDATE CASCADE,
+);
+
+CREATE TABLE Schedules
+(
+	startDate DATE NOT NULL, 
+	endDate DATE NOT NULL, 
+	scheduleID INT AUTO_INCREMENT UNIQUE PRIMARY KEY, 
+	managerID INT NOT NULL, 
+	name varchar(255) NOT NULL, 
+	FOREIGN KEY (managerID) REFERENCES Employees(employeeID) ON DELETE CASCADE ON UPDATE CASCADE
+); 
+
