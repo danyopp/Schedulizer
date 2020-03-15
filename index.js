@@ -136,7 +136,13 @@ function getManEmployees(res, mysql, context, complete, employeeNum){
     //
     //
 
-
+    //Assign employee to shift
+    //
+    //
+    //
+    //
+    //
+    //
 
 
 // ==============================================
@@ -205,6 +211,18 @@ app.get("/user/:usernum", function(req,res){
     function complete(){
         callbackCount++;
         if(callbackCount >= 3){
+            //Trim timestamp off of datetime
+            for(var j = 0; j < context.requestinfo.length; j++){
+                var tempDate = context.requestinfo[j].date.split('T')
+                context.requestinfo[j].date = tempDate[0];
+            }
+            console.log(context.shiftinfo)
+            for(var j = 0; j < context.shiftinfo.length; j++){
+                var tempDate = context.shiftinfo[j].date.split('T')
+                context.shiftinfo[j].date = tempDate[0];
+            }
+
+
             res.render("user.ejs",{pagetitle: "User Account", userInfo: context.userinfo, schInfo: context.shiftinfo, requestInfo: context.requestinfo});
         }
     }
@@ -258,6 +276,18 @@ app.get("/manager/:usernum", function(req,res){
         function complete(){
             callbackCount++;
             if(callbackCount >= 4){
+                console.log(context.schedinfo)
+                //Trim timestamp off of datetime
+                for(var j = 0; j < context.torinfo.length; j++){
+                    var tempDate = context.torinfo[j].date.split('T')
+                    context.torinfo[j].date = tempDate[0];
+                }
+                for(var j = 0; j < context.schedinfo.length; j++){
+                    var tempDate = context.schedinfo[j].startDate.split('T')
+                    context.schedinfo[j].startDate = tempDate[0];
+                    tempDate = context.schedinfo[j].endDate.split('T')
+                    context.schedinfo[j].endDate = tempDate[0];
+                }
                 res.render("manager.ejs", {pagetitle: "Manager Account", 
                 userInfo: context.userinfo, 
                 schInfo: context.schedinfo,
@@ -357,6 +387,11 @@ app.get("/schedule/:scheNum", function(req,res){
         function complete(){
             callbackCount++;
             if(callbackCount >= 2){
+                // console.log(context.scheduleinfo)
+                for(var j = 0; j < context.shiftinfo.length; j++){
+                    var tempDate = context.shiftinfo[j].date.split('T')
+                    context.shiftinfo[j].date = tempDate[0];
+                }
                 res.render("schedule.ejs",{pagetitle: "Schedule Page", schedInfo: context.scheduleinfo, shiftInfo: context.shiftinfo});
                 }
         }

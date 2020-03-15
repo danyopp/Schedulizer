@@ -5,56 +5,34 @@
 <head>
   <%- include('partials/head') %>
 
+
 </head>
 
-<body class="container">
+<body>
+    <script type="text/javascript">
+        function revealManSelect() {
+            if (document.getElementById("radio1").checked){
+                document.getElementById("managerSelect").style.display = 'block';
+                document.getElementById("selectManager").required = true; 
+            }
+            else {
+                document.getElementById("managerSelect").style.display = 'none';
+                document.getElementById("selectManager").required = false; 
+            }
+        }
+    </script>
 
-    <div class="row">
-            <div class="card col-sm-12">
-                <h5 class="card-header text-center">Create New User</h5>
-                <div class="card-body"> 
-                    <!-- FORM HERE FOR CREATING USER  -->
-                    <form action="/createuser" method="POST">
-                        <div class="form-group">
-                            <label for="newEmail">Email address</label>
-                            <input type="email" class="form-control mb-3" id="newEmail" name="email" placeholder="Email" required>
-                            <label for="fname">First Name</label>
-                            <input type="text" class="form-control mb-3" id="fname" name="firstname" placeholder="First Name" required>
-                            <label for="lname">Last Name</label>
-                            <input type="text" class="form-control mb-3" id="lname" name="lastname" placeholder="Last Name" required>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="userType" id="radio1" value="0" checked="checked">
-                                <label class="form-check-label" for="radio1">
-                                  User Account
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="userType" id="radio2" value="1">
-                                <label class="form-check-label" for="radio2">
-                                  Manager Account
-                                </label>
-                            </div>
-                            <label class="mr-sm-2 mt-4" for="selectManager">Select the Manager of this Employee (Ignore this field if creating a manager):</label>
-                            <select class="custom-select mr-sm-2" id="selectManager" name="userNumber" required>
-                            <option selected disabled>Choose...</option>
-                                <%        Users.forEach(function(ele, i){       %>
-                                <%        if (ele.isManager === 1){         %>
-                            <option value="<%= ele.employeeID %>">
-                                <%=     ele.firstName                           %> 
-                                <%=     ele.lastName                            %>
-                                </option>
-                                <%  }   });                                     %>
-                            </select>
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">
+            <i class="material-icons" style="font-size:30px">event</i>        
+            <span class="align-top">Schedulizer</span>
+        </a>
+    </nav>
 
-                            <input type="submit" class="btn btn-primary" value="Create New User">
-                        </div>
-                    </form>
-                </div>
-            </div>
-    </div>
+  <div class="container">
     <div class="row">
         <div class="card col-sm-6">
-            <h5 class="card-header text-center"> Select A User Account</h5>
+            <h5 class="card-header text-center"> Access A Employee Account</h5>
             <!-- FORM FOR MOVING TO USER PAGE -->
             <form action="/accessuser" method="POST" class="card-body">
                 <label class="mr-sm-2" for="userId">Available User Accounts:</label>
@@ -72,7 +50,7 @@
             </form>    
         </div>
         <div class="card col-sm-6">
-            <h5 class="card-header text-center"> Select A Manager Account</h5>
+            <h5 class="card-header text-center"> Access A Manager Account</h5>
             <!-- FORM FOR MOVING TO MANAGER PAGE -->
             <form action="accessmanager" method="POST" class="card-body">
                 <label class="mr-sm-2" for="uAccount">Available Manager Accounts:</label>
@@ -90,7 +68,54 @@
             </form>    
         </div>
     </div>
+    <div class="row">
+        <div class="card col-sm-12 text-white bg-secondary">
+            <h5 class="card-header text-center">Create New User</h5>
+            <div class="card-body"> 
+                <!-- FORM HERE FOR CREATING USER  -->
+                <form action="/createuser" method="POST">
+                    <div class="form-group">
+                        <label for="newEmail">Email address</label>
+                        <input type="email" class="form-control mb-3" id="newEmail" name="email" placeholder="Email" required>
+                        <label for="fname">First Name</label>
+                        <input type="text" class="form-control mb-3" id="fname" name="firstname" placeholder="First Name" required>
+                        <label for="lname">Last Name</label>
+                        <input type="text" class="form-control mb-3" id="lname" name="lastname" placeholder="Last Name" required>
+                        <div class="form-check">
+                            <input class="form-check-input" onclick="javascript:revealManSelect()" type="radio" name="userType" id="radio2" value="1">
+                            <label class="form-check-label" for="radio2">
+                              Manager Account
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" onclick="javascript:revealManSelect()" type="radio" name="userType" id="radio1" value="0">
+                            <label class="form-check-label" for="radio1">
+                              User Account
+                            </label>
+                        </div>
+                        <div id="managerSelect" style="display:none">
+                            <label class="mr-sm-2 mt-4" for="selectManager">Select the Manager of this Employee (Ignore this field if creating a manager):</label>
+                            <select class="custom-select mr-sm-2" id="selectManager" name="userNumber">
+                            <option selected disabled>Choose...</option>
+                                <%        Users.forEach(function(ele, i){       %>
+                                <%        if (ele.isManager === 1){         %>
+                            <option value="<%= ele.employeeID %>">
+                                <%=     ele.firstName                           %> 
+                                <%=     ele.lastName                            %>
+                                </option>
+                                <%  }   });                                     %>
+                            </select>
+                        </div>    
+                        <input type="submit" class="btn btn-primary" value="Create New User">
+                    </div>
+                </form>
+            </div>
+        </div>
+</div>
     <%- include('partials/footscripts') %>
+  </div>
+
+
 </body>
 </html>
 

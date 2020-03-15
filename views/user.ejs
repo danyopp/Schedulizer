@@ -4,16 +4,25 @@
 
 <head>
   <%- include('partials/head') %>
-  
+
 </head>
 
-<body class="container">
+<body >
 
-    <div class="row">
-            <h5 class="text-center col-sm-12">USER ACCOUNT: 
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">
+            <i class="material-icons" style="font-size:30px">event</i>        
+            <span class="align-top">Schedulizer</span>
+        </a>
+        <span class="navbar-text">
+            USER ACCOUNT: 
                 <%= userInfo[0].firstName %>
                 <%= userInfo[0].lastName %>
-            </h5>
+          </span>
+      </nav>
+
+  <div class="container">
+    <div class="row">
     </div>
     <div class="row">
         <div class="card col-sm-12">
@@ -87,13 +96,13 @@
                     </thead>
                     <tbody>
                         
-                            <tr> <td>Sunday</td><td><input type="time" name="sunStart" required></td><td><input type="time" name="sunStop"required></td></tr>
-                            <tr> <td>Monday</td><td><input type="time" name="monStart"  required></td><td><input type="time" name="monStop"required></td></tr>
-                            <tr> <td>Tuesday</td><td><input type="time" name="tuesStart" required></td><td><input type="time" name="tuesStop"required></td></tr>
-                            <tr> <td>Wednesday</td><td><input type="time" name="wedStart" required></td><td><input type="time" name="wedStop"required></td></tr>
-                            <tr> <td>Thursday</td><td><input type="time" name="thurStart" required></td><td><input type="time" name="thurStop"required></td></tr>
-                            <tr> <td>Friday</td><td><input type="time" name="friStart" required></td><td><input type="time" name="friStop"required></td></tr>
-                            <tr> <td>Saturday</td><td><input type="time" name="satStart" required></td><td><input type="time" name="satStop"required></td></tr>
+                            <tr> <td>Sunday</td><td><input type="time" name="sunStart" value="<%=userInfo[0].sunStart%>" required></td><td><input type="time" name="sunStop" value="<%=userInfo[0].sunStop%>" required></td></tr>
+                            <tr> <td>Monday</td><td><input type="time" name="monStart" value="<%=userInfo[0].monStart%>"  required></td><td><input type="time" name="monStop" value="<%=userInfo[0].monStop%>" required></td></tr>
+                            <tr> <td>Tuesday</td><td><input type="time" name="tuesStart" value="<%=userInfo[0].tuesStart%>" required></td><td><input type="time" name="tuesStop" value="<%=userInfo[0].tuesStop%>" required></td></tr>
+                            <tr> <td>Wednesday</td><td><input type="time" name="wedStart" value="<%=userInfo[0].wedStart%>" required></td><td><input type="time" name="wedStop" value="<%=userInfo[0].wedStop%>" required></td></tr>
+                            <tr> <td>Thursday</td><td><input type="time" name="thurStart" value="<%=userInfo[0].thurStart%>" required></td><td><input type="time" name="thurStop" value="<%=userInfo[0].thurStop%>" required></td></tr>
+                            <tr> <td>Friday</td><td><input type="time" name="friStart" value="<%=userInfo[0].friStart%>" required></td><td><input type="time" name="friStop" value="<%=userInfo[0].friStop%>" required></td></tr>
+                            <tr> <td>Saturday</td><td><input type="time" name="satStart" value="<%=userInfo[0].satStart%>" required></td><td><input type="time" name="satStop" value="<%=userInfo[0].satStop%>" required></td></tr>
 
                     </tbody>
                   </table>
@@ -121,10 +130,14 @@
                         <%        requestInfo.forEach(function(ele, i){       %>
                             <tr>
                             <td> <%=     ele.date       %> </td>
-                            <td> <%=     ele.approvalStatus       %> </td>
+                                 <%   if( ele.approvalStatus === 0 ){      %>
+                                    <td class="text-danger"> Unapproved</td>
+                                    <%   }else{     %>
+                                    <td class="text-success"> Approved</td> 
+                                    <%   }     %>
                             <td> <%=     ele.comment       %> </td>
                             </tr>
-                                <%    });                  %>
+                            <%    });                  %>
 
 
                     </tbody>
@@ -151,5 +164,6 @@
 
 
     <%- include('partials/footscripts') %>
+  </div>
 </body>
 </html>

@@ -6,12 +6,25 @@
   <%- include('partials/head') %>
 </head>
 
-<body class="container">
-    <div class="row">
-            <h5 class="text-center col-sm-12">SCHEDULE: 
-                <%= schedInfo[0].name %>
-            </h5>
-    </div>
+<body>
+
+
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">
+            <i class="material-icons" style="font-size:30px">event</i>        
+            <span class="align-top">Schedulizer</span>
+        </a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/manager/<%=schedInfo[0].managerID%>">Manager Page<span class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+        <span class="navbar-text">
+            SCHEDULE: 
+            <%= schedInfo[0].name %>
+          </span>
+      </nav>
+      <div class="container">
     <div class="row">
         <div class="card col-sm-12 text-center">
             <h6 class="card-header"> Create New Shift</h6>
@@ -110,5 +123,6 @@
 
 
             <%- include('partials/footscripts') %>
+</div>
         </body>
         </html>            

@@ -4,15 +4,22 @@
 
 <head>
   <%- include('partials/head') %>
+
 </head>
 
 <body >
-    <div class="row">
-            <h5 class="text-center col-sm-12">MANAGER ACCOUNT: 
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">
+            <i class="material-icons" style="font-size:30px">event</i>        
+            <span class="align-top">Schedulizer</span>
+        </a>
+        <span class="navbar-text">
+            MANAGER ACCOUNT: 
                 <%= userInfo[0].firstName %>
                 <%= userInfo[0].lastName %>
-            </h5>
-    </div>
+          </span>
+      </nav>
+
     <div class="row">
         <div class= "card col-lg-12 text-center">
             <h6 class= "card-header">Current Schedules</h6>
