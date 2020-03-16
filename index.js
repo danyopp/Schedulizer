@@ -508,7 +508,7 @@ app.get("/shiftdelete/:schedID/:shiftnumber", function(req,res){
 //assign employee to shift
 app.post("/shiftassign/:shiftID", function(req,res){
     //create new schedule
-    console.log(req.params.shiftID, req.params, req.params.scheduleId);
+    // console.log(req.params.shiftID, req.params, req.params.scheduleId);
     // console.log("Selected Employee: ", req.body.userNumber)
     // res.redirect("/schedule/456" + req.params.scheduleID)
 });
