@@ -126,15 +126,49 @@ function getManEmployees(res, mysql, context, complete, employeeNum){
         });
     }
 
+
+
     //get employees available to work a shift
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
+    function shiftQueryCall(res, mysql, context, complete, query, index){
+        mysql.pool.query(query, function(error, results, fields){
+            if (error){
+                res.write(JSON.stringify(error));
+                res.end();
+            }
+            // console.log("returned sql: ", results)
+            context.shiftinfo[index].possibleEmploy = JSON.parse(JSON.stringify(results));
+            complete();
+
+        });
+
+
+    }
+    
+    
+    function getEmployeesforShifts(res, mysql, context, renderPage ){
+        var callbackCount = 0;
+        if (context.shiftinfo.length === 0)
+        { res.render("schedule.ejs",{pagetitle: "Schedule Page", schedInfo: context.scheduleinfo, shiftInfo: context.shiftinfo}); } 
+                   
+        for(var j = 0; j < context.shiftinfo.length; j++){
+            // console.log(j)
+            // console.log(context.scheduleinfo);
+            var query = "SELECT e.employeeID, e.lastname, e.firstname  FROM Employees e WHERE e.managerID = " + context.scheduleinfo[0].managerID +" AND e." + context.shiftinfo[j].datestart  +
+            " <= '" + context.shiftinfo[j].startTime + "' AND e." + context.shiftinfo[j].datestop + " >= '" + context.shiftinfo[j].stopTime + 
+            "' AND e.isManager = 0 AND e.employeeID NOT IN (SELECT tor.employeeID FROM `Time-Off-Requests` tor WHERE tor.date = '" + context.shiftinfo[j].date +"' AND tor.approvalStatus = 1 );"
+            // console.log(query);
+            shiftQueryCall(res, mysql, context, complete, query, j);
+            function complete(){
+                callbackCount++;
+                if(callbackCount >= context.shiftinfo.length){
+                    res.render("schedule.ejs",{pagetitle: "Schedule Page", schedInfo: context.scheduleinfo, shiftInfo: context.shiftinfo});          
+                }
+            }
+        }    
+    }
+    
+    
+    
 
     //Assign employee to shift
     //
@@ -276,7 +310,6 @@ app.get("/manager/:usernum", function(req,res){
         function complete(){
             callbackCount++;
             if(callbackCount >= 4){
-                console.log(context.schedinfo)
                 //Trim timestamp off of datetime
                 for(var j = 0; j < context.torinfo.length; j++){
                     var tempDate = context.torinfo[j].date.split('T')
@@ -381,10 +414,10 @@ app.get("/schedule/:scheNum", function(req,res){
         var callbackCount = 0;
         var context = {};
         var mysql = req.app.get('mysql');
-        getSchedule(res, mysql, context, complete, req.params.scheNum);
-        getSchedShifts(res, mysql, context, complete, req.params.scheNum);
+        getSchedule(res, mysql, context, dataFetched, req.params.scheNum);
+        getSchedShifts(res, mysql, context, dataFetched, req.params.scheNum);
         //Get employees who can work shifts
-        function complete(){
+        function dataFetched(){
             callbackCount++;
             if(callbackCount >= 2){
                 // console.log(context.scheduleinfo)
@@ -392,9 +425,34 @@ app.get("/schedule/:scheNum", function(req,res){
                     var tempDate = context.shiftinfo[j].date.split('T')
                     context.shiftinfo[j].date = tempDate[0];
                 }
-                res.render("schedule.ejs",{pagetitle: "Schedule Page", schedInfo: context.scheduleinfo, shiftInfo: context.shiftinfo});
+                //Get day of the week of each shift, create vars to use in mysql query
+                console.log(context.shiftinfo)
+                for (var j=0; j < context.shiftinfo.length; j++)
+                {
+                    var temp =  new Date((context.shiftinfo[j].date).replace("-","/"))
+                    if(temp.getDay()===0)
+                    {context.shiftinfo[j].datestart = "sunStart"; context.shiftinfo[j].datestop = "sunStop";}
+                    else if(temp.getDay()===1)
+                    {context.shiftinfo[j].datestart = "monStart"; context.shiftinfo[j].datestop = "monStop";}
+                    else if(temp.getDay()===2)
+                    {context.shiftinfo[j].datestart = "tuesStart"; context.shiftinfo[j].datestop = "tuesStop";}
+                    else if(temp.getDay()===3)
+                    {context.shiftinfo[j].datestart = "wedStart"; context.shiftinfo[j].datestop = "wedStop";}
+                    else if(temp.getDay()===4)
+                    {context.shiftinfo[j].datestart = "thurStart"; context.shiftinfo[j].datestop = "thurStop";}
+                    else if(temp.getDay()===5)
+                    {context.shiftinfo[j].datestart = "friStart"; context.shiftinfo[j].datestop = "friStop";}
+                    else if(temp.getDay()===6)
+                    {context.shiftinfo[j].datestart = "satStart"; context.shiftinfo[j].datestop = "satStop";}
                 }
+                console.log("debug1", context.shiftinfo.length)
+                getEmployeesforShifts(res, mysql, context, renderPage )
+            }
         }
+
+        function renderPage(res){
+                res.render("schedule.ejs",{pagetitle: "Schedule Page", schedInfo: context.scheduleinfo, shiftInfo: context.shiftinfo});
+        }    
 });
 
 
@@ -450,7 +508,7 @@ app.get("/shiftdelete/:schedID/:shiftnumber", function(req,res){
 //assign employee to shift
 app.post("/shiftassign/:shiftID", function(req,res){
     //create new schedule
-    console.log(req.params.shiftID);
+    console.log(req.params.shiftID, req.params, req.params.scheduleId);
     // console.log("Selected Employee: ", req.body.userNumber)
     // res.redirect("/schedule/456" + req.params.scheduleID)
 });

@@ -8,7 +8,6 @@
 
 <body>
 
-
     <nav class="navbar navbar-dark bg-dark">
         <a class="navbar-brand" href="/">
             <i class="material-icons" style="font-size:30px">event</i>        
@@ -16,113 +15,115 @@
         </a>
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="/manager/<%=schedInfo[0].managerID%>">Manager Page<span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="/manager/<%=schedInfo[0].managerID%>">Manager Page<span class="sr-only">(current)</span></a>
             </li>
         </ul>
         <span class="navbar-text">
             SCHEDULE: 
             <%= schedInfo[0].name %>
-          </span>
-      </nav>
-      <div class="container">
-    <div class="row">
-        <div class="card col-sm-12 text-center">
-            <h6 class="card-header"> Create New Shift</h6>
-            <form action="/schedule/createshift" method="POST">
-                <label for="Date">Date:</label>
-                <input type="date" id="Date" name="date"  
-                    min="<%= schedInfo.startdate%>"
-                    max="<%= schedInfo.enddate%>" 
-                    value="<%= schedInfo.startdate%>">
-                <label for="startTime">Start Time:</label>
-                <input type="time" id="startTime" name="startTime" >
-                <label for="endTime">End Time:</label>
-                <input type="time" id="endTime" name="endTime" >
-                <input type="hidden" name="scheduleId" value= "<%= schedInfo[0].scheduleID %>">
-                <input type="submit" class="btn btn-primary" value="Create Shift">
-            </form>
-        </div>
-    </div>
-    <div class="row">
-        <div class="card col-sm-12 text-center">
-            <h6 class="card-header"> Shifts Within This Schedule</h6>
-            <div class="card-body">
-                <table class= "table">
-                    <thead>
-                        <tr>
-                            <th>ShiftID</th>
-                            <th>Date</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Assigned EmployeeID</th>
-                            <th>Assigned EmployeeName</th>
-                            <th>Select Employee for Shift</th>
-                            <th>Delete Shift</th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                      <%        shiftInfo.forEach(function(ele, i){       %>
-                          <tr>
-                          <td> <%=     ele.shiftID       %> </td>
-                          <td> <%=     ele.date       %> </td>
-                          <td> <%=     ele.startTime       %> </td>
-                          <td> <%=     ele.stopTime       %> </td>
-                            <td><%=     ele.employeeID       %> </td>
-                            <td><%=     ele.firstName      %> <%=     ele.lastName      %></td>
-                            <td>
-                                <form action="/shiftassign/<%=ele.shiftID%>" method="post">
-                                    <select class="custom-select mr-sm-2" id="userId" name="userNumber" required>
-                                        <option selected disabled>Choose Employee...</option>
-                                            <%        if(ele.possibleEmploy != null) {     %>
-                                            <%        ele.possibleEmploy.forEach(function(employees, j){       %>
-                                        <option value="<%= employees.id %>">
-                                            <%=     employees.name    %> 
-                                            </option>
-                                            <%    });  };                                    %>
-                                    <input type="submit" value="update" class="btn btn-primary">
-
-                                </form>
-                            </td>
-
-
-                          <td>    <a href="/shiftdelete/<%= schedInfo[0].scheduleID %>/<%=  ele.shiftID %>" class="btn btn-danger">Delete</a>  </td>
-                          </tr>
-                              <%    });                  %>
-                    </tbody>
-                  </table>
+        </span>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="card col-sm-12 text-center">
+                <h6 class="card-header"> Create New Shift</h6>
+                <form action="/schedule/createshift" method="POST">
+                    <label for="Date">Date:</label>
+                    <input type="date" id="Date" name="date"  
+                        min="<%= schedInfo.startdate%>"
+                        max="<%= schedInfo.enddate%>" 
+                        value="<%= schedInfo.startdate%>">
+                    <label for="startTime">Start Time:</label>
+                    <input type="time" id="startTime" name="startTime" >
+                    <label for="endTime">End Time:</label>
+                    <input type="time" id="endTime" name="endTime" >
+                    <input type="hidden" name="scheduleId" value= "<%= schedInfo[0].scheduleID %>">
+                    <input type="submit" class="btn btn-primary" value="Create Shift">
+                </form>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="card col-sm-12 text-center">
-            <h6 class="card-header"> Update an Existing Shift</h6>
-            <form action="/shiftupdate" method="POST">
-                <select class=" mr-sm-2" id="shiftId" name="shiftNumber" required>
-                    <option selected disabled>Choose a Shift...</option>
-                        <%        if(shiftInfo != null) {     %>
-                        <%        shiftInfo.forEach(function(shifts, j){       %>
-                    <option value="<%= shifts.shiftID %>">
-                        <%=     shifts.shiftID    %> 
-                        </option>
-                        <%    });  };                                    %>
-                <label for="Date">Date:</label>
-                <input type="date" id="Date" name="date"  
-                    min="<%= schedInfo.startdate%>"
-                    max="<%= schedInfo.enddate%>" 
-                    value="<%= schedInfo.startdate%>">
-                <label for="startTime">Start Time:</label>
-                <input type="time" id="startTime" name="startTime" >
-                <label for="endTime">End Time:</label>
-                <input type="time" id="endTime" name="endTime" >
-                <input type="hidden" name="scheduleId" value= "<%= schedInfo[0].scheduleID %>">
-                <input type="submit" class="btn btn-primary" value="Update Shift">
-            </form>
+        <div class="row">
+            <div class="card col-sm-12 text-center">
+                <h6 class="card-header"> Shifts Within This Schedule</h6>
+                <div class="card-body">
+                    <table class= "table">
+                        <thead>
+                            <tr>
+                                <th>ShiftID</th>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Assigned EmployeeID</th>
+                                <th>Assigned EmployeeName</th>
+                                <th>Select Employee for Shift</th>
+                                <th>Delete Shift</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <%        shiftInfo.forEach(function(ele, i){       %>
+                            <tr>
+                            <td> <%=     ele.shiftID       %> </td>
+                            <td> <%=     ele.date       %> </td>
+                            <td> <%=     ele.startTime       %> </td>
+                            <td> <%=     ele.stopTime       %> </td>
+                                <td><%=     ele.employeeID       %> </td>
+                                <td><%=     ele.firstName      %> <%=     ele.lastName      %></td>
+                                <td>
+                                    <form action="/shiftassign/<%=ele.shiftID%>" method="post">
+                                        <input type="hidden" name="scheduleId" value= "982323sd">
+                                        <select class="custom-select mr-sm-2" id="userId" name="userNumber" required>
+                                            <option selected disabled>Choose Employee...</option>
+                                                <%        if(ele.possibleEmploy != null) {     %>
+                                                <%        ele.possibleEmploy.forEach(function(employees, j){       %>
+                                            <option value="<%= employees.employeeID %>">
+                                                <%=     employees.firstname    %> 
+                                                <%=     employees.lastname    %> 
+                                                </option>
+                                                <%    });  };                                    %>    
+                                        <input type="submit" value="update" class="btn btn-primary">
+
+                                    </form>
+                                </td>
+
+
+                            <td>    <a href="/shiftdelete/<%= schedInfo[0].scheduleID %>/<%=  ele.shiftID %>" class="btn btn-danger">Delete</a>  </td>
+                            </tr>
+                                <%    });                  %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+        <div class="row">
+            <div class="card col-sm-12 text-center">
+                <h6 class="card-header"> Update an Existing Shift</h6>
+                <form action="/shiftupdate" method="POST">
+                    <select class=" mr-sm-2" id="shiftId" name="shiftNumber" required>
+                        <option selected disabled>Choose a Shift...</option>
+                            <%        if(shiftInfo != null) {     %>
+                            <%        shiftInfo.forEach(function(shifts, j){       %>
+                        <option value="<%= shifts.shiftID %>">
+                            <%=     shifts.shiftID    %> 
+                            </option>
+                            <%    });  };                                    %>
+                    <label for="Date">Date:</label>
+                    <input type="date" id="Date" name="date"  
+                        min="<%= schedInfo.startdate%>"
+                        max="<%= schedInfo.enddate%>" 
+                        value="<%= schedInfo.startdate%>">
+                    <label for="startTime">Start Time:</label>
+                    <input type="time" id="startTime" name="startTime" >
+                    <label for="endTime">End Time:</label>
+                    <input type="time" id="endTime" name="endTime" >
+                    <input type="hidden" name="scheduleId" value= "<%= schedInfo[0].scheduleID %>">
+                    <input type="submit" class="btn btn-primary" value="Update Shift">
+                </form>
+            </div>
+        </div>
+
+
+    <%- include('partials/footscripts') %>
     </div>
-
-
-            <%- include('partials/footscripts') %>
-</div>
-        </body>
-        </html>            
+</body>
+</html>            
