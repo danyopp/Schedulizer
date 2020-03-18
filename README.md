@@ -1,5 +1,5 @@
-Notes about the sample data included in Data Definition Queries
-    Each manager only currently has one schedule for simplicity of examining functionality
+Notes about the sample data included in Data Definition Queries.
+    Each manager only currently has one schedule for simplicity of examining functionality.
     Feel free to add additional schedules or update existing availability but know that this sample data may not still hold true. 
 
 
