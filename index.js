@@ -155,7 +155,8 @@ function getManEmployees(res, mysql, context, complete, employeeNum){
             // console.log(context.scheduleinfo);
             var query = "SELECT e.employeeID, e.lastname, e.firstname  FROM Employees e WHERE e.managerID = " + context.scheduleinfo[0].managerID +" AND e." + context.shiftinfo[j].datestart  +
             " <= '" + context.shiftinfo[j].startTime + "' AND e." + context.shiftinfo[j].datestop + " >= '" + context.shiftinfo[j].stopTime + 
-            "' AND e.isManager = 0 AND e.employeeID NOT IN (SELECT tor.employeeID FROM `Time-Off-Requests` tor WHERE tor.date = '" + context.shiftinfo[j].date +"' AND tor.approvalStatus = 1 );"
+            "' AND e.isManager = 0 AND e.employeeID NOT IN (SELECT tor.employeeID FROM `Time-Off-Requests` tor WHERE tor.date = '" + context.shiftinfo[j].date +"' AND tor.approvalStatus = 1 )" +
+            " AND e.employeeID NOT IN (SELECT s.employeeID FROM `Shifts` s WHERE s.date = '" + context.shiftinfo[j].date + "' AND s.employeeID IS NOT NULL );"
             // console.log(query);
             shiftQueryCall(res, mysql, context, complete, query, j);
             function complete(){
@@ -167,16 +168,6 @@ function getManEmployees(res, mysql, context, complete, employeeNum){
         }    
     }
     
-    
-    
-
-    //Assign employee to shift
-    //
-    //
-    //
-    //
-    //
-    //
 
 
 // ==============================================
@@ -250,7 +241,7 @@ app.get("/user/:usernum", function(req,res){
                 var tempDate = context.requestinfo[j].date.split('T')
                 context.requestinfo[j].date = tempDate[0];
             }
-            console.log(context.shiftinfo)
+            // console.log(context.shiftinfo)
             for(var j = 0; j < context.shiftinfo.length; j++){
                 var tempDate = context.shiftinfo[j].date.split('T')
                 context.shiftinfo[j].date = tempDate[0];
@@ -426,9 +417,10 @@ app.get("/schedule/:scheNum", function(req,res){
                     context.shiftinfo[j].date = tempDate[0];
                 }
                 //Get day of the week of each shift, create vars to use in mysql query
-                console.log(context.shiftinfo)
+                // console.log(context.scheduleinfo)
                 for (var j=0; j < context.shiftinfo.length; j++)
                 {
+                    // console.log(context.shiftinfo[j].date)
                     var temp =  new Date((context.shiftinfo[j].date).replace("-","/"))
                     if(temp.getDay()===0)
                     {context.shiftinfo[j].datestart = "sunStart"; context.shiftinfo[j].datestop = "sunStop";}
@@ -445,7 +437,6 @@ app.get("/schedule/:scheNum", function(req,res){
                     else if(temp.getDay()===6)
                     {context.shiftinfo[j].datestart = "satStart"; context.shiftinfo[j].datestop = "satStop";}
                 }
-                console.log("debug1", context.shiftinfo.length)
                 getEmployeesforShifts(res, mysql, context, renderPage )
             }
         }
@@ -473,7 +464,7 @@ app.post("/schedule/createshift", function(req,res){
 
 //update a shift
 app.post("/shiftupdate", function(req,res){
-    console.log(req.body);
+    // console.log(req.body);
     var mysql = req.app.get('mysql');
     var sql = "UPDATE `Shifts` SET startTime=?, stopTime=?, date=? WHERE shiftID = " + req.body.shiftNumber;
     var inserts = [req.body.startTime, req.body.endTime, req.body.date];
@@ -507,10 +498,31 @@ app.get("/shiftdelete/:schedID/:shiftnumber", function(req,res){
 
 //assign employee to shift
 app.post("/shiftassign/:shiftID", function(req,res){
-    //create new schedule
-    // console.log(req.params.shiftID, req.params, req.params.scheduleId);
+
+    var mysql = req.app.get('mysql');
+    var sql = ""
+    var inserts = [];
+    if(req.body.userNumber == "NULL"){
+        var sql = "UPDATE `Shifts` SET employeeID = NULL WHERE shiftID = ?";
+        var inserts = [req.params.shiftID];
+    }
+    else{
+        var sql = "UPDATE `Shifts` SET employeeID = ? WHERE shiftID = ?";
+        var inserts = [req.body.userNumber, req.params.shiftID];
+    }
+    sql = mysql.pool.query(sql,inserts,function(error, results, fields){
+        if(error){
+            res.write(JSON.stringify(error));
+            res.end();
+        }else{
+            res.redirect("/schedule/" + req.body.scheduleID)
+        }
+    });
+    // console.log(req.params.shiftID, req.params, req.body.scheduleID);
     // console.log("Selected Employee: ", req.body.userNumber)
-    // res.redirect("/schedule/456" + req.params.scheduleID)
+
+
+    // res.redirect("/schedule/" + req.body.scheduleID)
 });
 
 
