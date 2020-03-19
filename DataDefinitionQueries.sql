@@ -4,10 +4,10 @@
 -- SET time_zone = "+00:00";
 
 SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS `Employees`;
 DROP TABLE IF EXISTS `Shifts`;
 DROP TABLE IF EXISTS `Time-Off-Requests`;
 DROP TABLE IF EXISTS `Schedules`;
+DROP TABLE IF EXISTS `Employees`;
 SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE `Employees` (
