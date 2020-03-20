@@ -81,3 +81,4 @@ SELECT e.employeeID, e.lastname, e.firstname  FROM Employees e
         AND e.employeeID NOT IN (SELECT tor.employeeID FROM `Time-Off-Requests` tor WHERE tor.date = :shiftDate AND tor.approvalStatus = 1) 
         AND e.employeeID NOT IN (SELECT s.employeeID FROM `Shifts` s WHERE s.date = :shiftDate AND s.employeeID IS NOT NULL) ;
 -- Assign Employee to Shift
+UPDATE `Shifts` SET employeeID = req.body.userNumber WHERE shiftID = req.params.shiftID
