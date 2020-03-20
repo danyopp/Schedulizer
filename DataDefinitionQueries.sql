@@ -69,7 +69,7 @@ CREATE TABLE `Time-Off-Requests` (
 
 INSERT INTO `Time-Off-Requests` (`employeeID`, `date`, `comment`, `approvalStatus`) VALUES
 (12, '2020-3-18', 'Melody Going on Vacation', True),
-(13, '2020-3-18', 'Clay Out of Town', False),
+(13, '2020-3-18', 'Clay Out of Town', FALSE),
 (16, '2019-3-18', "Conrad's Family in town", True),
 (17, '2019-3-18', 'Dolly Out of Town', FALSE);
 
